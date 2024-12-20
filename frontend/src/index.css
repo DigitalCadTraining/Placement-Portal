@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ... */
+/* Root variables for consistent theming */
+:root {
+  --primary-color: #F83002; /* Accent color */
+  --secondary-color: #333333; /* Text color */
+  --background-color: #f9f9f9; /* Background color */
+  --font-family: 'Arial', 'Helvetica', sans-serif; /* Default font */
+  --font-size-base: 16px; /* Base font size */
+  --font-color: #000000; /* Default font color */
+  --border-radius: 5px; /* Default border radius */
+}
+
+/* Global Reset */
+* {
+  margin: 2px;
+  padding: 10;
+  box-sizing: border-box;
+}

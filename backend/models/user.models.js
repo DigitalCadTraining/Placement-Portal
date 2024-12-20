@@ -1,27 +1,26 @@
-import bcrpt from "bcryptjs"
+
 import mongoose from "mongoose"
 const userSchema = new mongoose.Schema({
     fullName:{
         type:String,
-        require:true,
+        required:true,
     },
     email:{
         type:String,
-        require:true,
+        required:true,
         unique:true
     },
     phoneNumber:{
         type:Number,
-        require:true,
+        required:true,
     },
     password:{
         type:String,
-        require:true,
+        required:true,
     },
-    roll:{
+    role:{
         type:String,
-        enum:['student','recruiter'], //for many options and to choose one
-        require:true,
+        enum:['student', 'recruiter'], //for many options and to choose one
     },
     profile:{
         bio:{type:String},

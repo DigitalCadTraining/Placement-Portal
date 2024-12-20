@@ -1,13 +1,14 @@
 import { User } from "../models/user.models.js";
-import bcrpt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const register = async (req, res) => {
   try {
-    const { fullname, email, phoneNumber, password, role } = req.body;
-    if (!fullname || !email || !phoneNumber || !password || !role) {
+    const { fullName, email, phoneNumber, password, role } = req.body;
+    console.log(req.body, fullName);
+    if (!fullName || !email || !phoneNumber || !password || !role) {
       return res.status(400).json({
-        message: "Something is missing",
+        message: "Somethings is missing",
         success: false,
       });
     }
@@ -18,13 +19,13 @@ export const register = async (req, res) => {
         success: false,
       });
     }
-    const hashedPassword = await bcrpt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     await User.create({
       fullName,
       email,
       phoneNumber,
-      password,
+      password: hashedPassword,
       role, //profile we arre not adding because it is not required as we put in models, if we need in future will add
     });
     return res.status(200).json({
@@ -67,15 +68,16 @@ export const login = async (req, res) => {
 
     const tokenData = {
       userId: user._id,
+      userName: role
     };
 
     const token = await jwt.sign(tokenData, process.env.SECRET_KEY, {
-      expiresIn: "Id",
+      expiresIn: "1d",
     });
 
     user = {
       _id: user._id,
-      fullname: user.fullname,
+      fullName: user.fullName,
       email: user.email,
       phoneNumber: user.phoneNumber,
       role: user.role,
@@ -92,6 +94,7 @@ export const login = async (req, res) => {
       .json({
         message: `Welcome back ${user.fullName}`,
         success: true,
+        token
       });
   } catch (error) {
     console.log(error);
@@ -111,20 +114,19 @@ export const logout = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-    const { fullname, email, phoneNumber, bio, skills } = req.body;
+    const { fullName, email, phoneNumber, bio, skills } = req.body;
     const file = req.file;
-    if (!fullname || !email || !phoneNumber || !bio || !skills) {
-      return res.status(400).json({
-        message: "Something is missing",
-        success: false,
-      });
-    }
 
     //cloudinary ayega idhar
+    let skillsArray;
+    if (skills) {
+      skillsArray = skills.split(",");
+    }
 
-    const skillsArray = skills.split(",");
-    const userId = req.id; //get from middleware authentication
-    let user = User.findById(userId);
+    //const skillsArray = skills.split(",");
+    const userId = req.userId; //get from middleware authentication
+    console.log(userId)
+    let user = await User.findById(userId);
 
     if (!user) {
       return res.status(400).json({
@@ -134,11 +136,11 @@ export const updateProfile = async (req, res) => {
     }
 
     //updating data
-    (user.fullName = fullname),
-      (user.email = email),
-      (user.phoneNumber = phoneNumber),
-      (user.profile.bio = bio),
-      (user.profile.skills = skillsArray);
+    if (fullName) user.fullName = fullName
+    if (email) user.email = email
+    if (phoneNumber) user.phoneNumber = phoneNumber
+    if (bio) user.bio = bio
+    if (skills) user.skills = skills
 
     //resume comes later here
 
@@ -146,7 +148,7 @@ export const updateProfile = async (req, res) => {
 
     user = {
       _id: user._id,
-      fullname: user.fullName,
+      fullName: user.fullName,
       email: user.email,
       phonenumber: user.phoneNumber,
       role: user.role,
